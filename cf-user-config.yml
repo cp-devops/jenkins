@@ -1,0 +1,56 @@
+Parameters:
+
+
+Resources:
+
+myaccesskey:
+  Type: AWS::IAM::AccessKey
+  Properties:
+    UserName:
+      !Ref myuser
+
+mygroup:
+  Type: AWS::IAM::Group
+  Properties:
+    Path: "/myapplication/"
+    Policies:
+    - PolicyName: myapppolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - sqs:*
+          Resource: !GetAtt myqueue.Arn
+        - Effect: Deny
+          Action:
+          - sqs:*
+          NotResource: !GetAtt myqueue.Arn
+
+addUserToGroup:
+  Type: AWS::IAM::UserToGroupAddition
+  Properties:
+    GroupName: myexistinggroup2
+    Users:
+    - existinguser1
+    - !Ref myuser
+
+jenkinspolicy:
+  Type: AWS::IAM::Policy
+  Properties:
+    PolicyName: jenkinsgrouppolicy
+    PolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+      - Effect: Allow
+        Action:
+        - s3:GetObject
+        - s3:PutObject
+        - s3:PutObjectAcl
+        Resource: arn:aws:s3:::*
+    Groups:
+    - myexistinggroup1
+    - !Ref mygroup
+
+Output:
+
